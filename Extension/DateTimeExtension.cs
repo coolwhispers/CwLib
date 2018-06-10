@@ -16,7 +16,28 @@ namespace CwLib.Extension
         /// <returns></returns>
         public static DateTime ToLcoalTime(this DateTime dateTime, TimeSpan timeSpan)
         {
+            dateTime.ToIso8601();
             return dateTime.Add(-timeSpan);
+        }
+
+        public static Iso8601 ToIso8601(this DateTime dateTime)
+        {
+            return new Iso8601(dateTime);
+        }
+
+        public class Iso8601
+        {
+            DateTime _dateTime;
+
+            internal Iso8601(DateTime dateTime)
+            {
+                _dateTime = dateTime;
+            }
+
+            public string ToUtcStirng()
+            {
+                return string.Format("{0:yyyy-MM-dd}T{0:HH:mm:ss}Z", _dateTime.ToUniversalTime());
+            }
         }
     }
 
