@@ -13,10 +13,18 @@ namespace CwLib.AOP
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("Priority value cannot be less than 0");
+                    throw new ArgumentOutOfRangeException("CwAopAttribute priority value cannot be less than 0");
                 }
 
                 _priority = value;
+            }
+        }
+
+        protected void StopExecuteMethod()
+        {
+            if ((AopAction.ExecuteMethod & EcecuteType.Method) == EcecuteType.Method)
+            {
+                AopAction.ExecuteMethod ^= EcecuteType.Method;
             }
         }
 
