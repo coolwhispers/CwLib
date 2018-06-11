@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 namespace CwLib.Redis
 {
-public sealed class RedisStream : Stream
+    public sealed class RedisStream : Stream
     {
         private RedisBuffer _buffer;
 
