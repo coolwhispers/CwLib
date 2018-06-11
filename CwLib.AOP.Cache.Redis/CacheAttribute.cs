@@ -1,7 +1,7 @@
 ﻿using System;
 using CwLib.AOP;
 
-namespace CwLib.Cache.Redis
+namespace CwLib.AOP.Cache.Redis
 {
     public class CwCacheMethodAttribute : CwAopAttribute
     {        
