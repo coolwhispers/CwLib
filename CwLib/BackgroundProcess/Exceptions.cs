@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CwLib.BackgroundService
+namespace CwLib.BackgroundProcess
 {
     internal enum ExceptionCode
     {

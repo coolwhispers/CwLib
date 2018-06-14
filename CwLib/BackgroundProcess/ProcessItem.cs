@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace CwLib.BackgroundService
+namespace CwLib.BackgroundProcess
 {
   /// <summary>
     /// Process Item

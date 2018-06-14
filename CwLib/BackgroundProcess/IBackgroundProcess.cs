@@ -1,4 +1,4 @@
-namespace CwLib.BackgroundService
+namespace CwLib.BackgroundProcess
 {
     public interface IBackgroundProcess
     {

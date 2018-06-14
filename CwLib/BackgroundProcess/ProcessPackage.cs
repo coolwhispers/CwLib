@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CwLib.BackgroundService
+namespace CwLib.BackgroundProcess
 {
     /// <summary>
     /// Process List

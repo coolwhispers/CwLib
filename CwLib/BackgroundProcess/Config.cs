@@ -1,4 +1,4 @@
-namespace CwLib.BackgroundService
+namespace CwLib.BackgroundProcess
 {
     class Config
     {
