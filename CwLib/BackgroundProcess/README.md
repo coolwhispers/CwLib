@@ -6,29 +6,33 @@ Create class
 public class TestProcess : IBackgroundProcess
 {
     /// <summary>
-    /// Background Start
+    /// Start DoSomething()
     /// </summary>
     public void BackgroundStart()
     {
+        _run = true;
        _task = Task.Run(() => { DoSomething(); });
     }
 
     Task _task;
+    bool _run;
 
     void DoSomething()
     {
-        while(true)
+        while(_run)
         {
-
+            // Do something...
         }
     }
 
     /// <summary>
-    /// Background Stop.
+    /// Stop Dosomething()
     /// </summary>
     public void BackgroundStop()
     {
-        //Stop task...
+        //Stop DoSomething() task...
+        _run =false;
+        _task.Wait();
     }
 }
 ```
