@@ -9,6 +9,17 @@ namespace CwLib.Extension
     public static class DateTimeExtension
     {
         /// <summary>
+        /// 民國年
+        /// </summary>
+        /// <param name="dateTime"></param>
+        /// <returns></returns>
+        public static int TaiwanYear(this DateTime dateTime)
+        {
+            var year = dateTime.Year - 1911;
+            return year <= 0 ? year - 1 : year;
+        }
+
+        /// <summary>
         /// 依據TimeSpan取得當地時間
         /// </summary>
         /// <param name="dateTime">The date time.</param>
