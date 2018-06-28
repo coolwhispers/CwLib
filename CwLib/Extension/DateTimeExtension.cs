@@ -19,6 +19,15 @@ namespace CwLib.Extension
             return year <= 0 ? year - 1 : year;
         }
 
+        public static string TaiwanYearString(this DateTime dateTime, string yearFormat = "{0}")
+        {
+            var year = dateTime.TaiwanYear();
+
+            var yearString = year <= 0 ? $"民國前{yearFormat}年" : $"民國{yearFormat}年";
+
+            return string.Format(yearString, Math.Abs(year));
+        }
+
         /// <summary>
         /// 依據TimeSpan取得當地時間
         /// </summary>
