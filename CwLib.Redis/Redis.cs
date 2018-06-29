@@ -9,19 +9,37 @@ namespace CwLib.Redis
 
         public static ConnectionMultiplexer GetConnection() => _connection.Value;
 
-        public IDatabase Database(int db = -1)
+        public static IDatabase Database(int db = -1)
         {
             return GetConnection().GetDatabase(db);
         }
 
-        static Redis()
+        public static RedisDatabase GetDatabase(int db = -1)
         {
-            var connectionString =
-               System.Configuration.ConfigurationManager.AppSettings["RedisConnection"];
-            var options = ConfigurationOptions.Parse(connectionString);
-            _connection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(options));
+            return new RedisDatabase(db);
         }
 
+        static Redis()
+        {
+            _connection = new Lazy<ConnectionMultiplexer>(() =>
+            {
+                var connectionString =
+                    System.Configuration.ConfigurationManager.AppSettings["RedisConnection"];
+                var options = ConfigurationOptions.Parse(connectionString);
+                return ConnectionMultiplexer.Connect(options);
+            });
+        }
+
+        public static IDisposable Lock(int lockTimeout = 20, int db = -1)
+        {
+            var id = Guid.NewGuid().ToString().ToUpper();
+
+            return Lock(id, lockTimeout, db);
+        }
+        public static IDisposable Lock(string lockName, int lockTimeout = 20, int db = -1)
+        {
+            return new RedisLock(lockName, lockTimeout, db);
+        }
 
     }
 }
