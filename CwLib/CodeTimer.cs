@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Name
+namespace CwLib
 {
     public class CodeTimer : IDisposable
     {
