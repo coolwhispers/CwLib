@@ -104,6 +104,15 @@ namespace CwLib.AOP.Cache.Redis
         }
     }
 
+    public class CwCacheNamespaceAttribute : Attribute
+    {
+        public string Namespace { get; set; }
+        public CwCacheNamespaceAttribute(string nameSpace)
+        {
+            Namespace = nameSpace;
+        }
+    }
+
     public class CwRedisCacheAttribute : CwAopAttribute
     {
         protected int WaitTime { get; set; } = 20;
@@ -120,18 +129,35 @@ namespace CwLib.AOP.Cache.Redis
 
         protected string CreateKey()
         {
-            //TODO:
-            var source = Encoding.Default.GetBytes("1234567"); //將字串轉為Byte[]
+            var source = Serializer.Serialize(AopAction.Args);
 
             var provider = new MD5CryptoServiceProvider();
             var crypto = provider.ComputeHash(source);
             var result = BitConverter.ToString(crypto);
 
-            return $"{CreateNamespaceKey()}{AopAction.TargetMethod.Name}_{result}";
+            return $"{CreateNamespaceString()}{AopAction.TargetMethod.Name}_{result}";
         }
 
-        protected string CreateNamespaceKey()
+        protected string CreateNamespaceString()
         {
+            var objectName = typeof(object).Name;
+            var customAttribute = typeof(CwCacheNamespaceAttribute);
+            var method = AopAction.TargetMethod.DeclaringType;
+            var classNamespace = method.FullName;
+
+            while (string.IsNullOrWhiteSpace(Namespace) && method.Name != objectName)
+            {
+                var attribute = (CwCacheNamespaceAttribute) method.GetCustomAttribute(customAttribute);
+
+                if (attribute != null)
+                {
+                    Namespace = attribute.Namespace;
+                    break;
+                }
+
+                method = method.BaseType;
+            }
+
             return $"{Namespace}_";
         }
     }
