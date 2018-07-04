@@ -1,5 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization.Json;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using CwLib.AOP;
 
@@ -8,28 +14,100 @@ namespace CwLib.AOP.Cache.Redis
     public interface ISerializer
     {
         byte[] Serialize(object data);
-        object Deserialize(byte[] data);
+        object Deserialize(byte[] data, Type type);
     }
 
-    class Serializer : ISerializer
+    class JsonFormatter : ISerializer
     {
-        public byte[] Serialize(object data)
+        public bool UseJsonDotNet { get; }
+
+        private MethodInfo SerializerMethod;
+        private MethodInfo DeserializeMethod;
+
+        private bool JsonDotNetInit()
         {
-            //TODO:
-            return null;
+            try
+            {
+                var jsonDotNet = Assembly.Load(new AssemblyName("Newtonsoft.Json"));
+                var jsonConvertType = jsonDotNet.ExportedTypes.Where(x => x.FullName == "Newtonsoft.Json.JsonConvert").FirstOrDefault();
+                var jsonConvertTypeInfo = jsonConvertType.GetTypeInfo();
+                DeserializeMethod = jsonConvertTypeInfo.GetDeclaredMethods("DeserializeObject").FirstOrDefault(x => x.IsGenericMethodDefinition && x.GetParameters().Length == 1);
+                SerializerMethod = jsonConvertTypeInfo.GetDeclaredMethods("SerializeObject").FirstOrDefault(x => x.GetParameters().Length == 1);
+
+                return DeserializeMethod != null && SerializerMethod != null;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+
+                return false;
+            }
         }
 
-        public object Deserialize(byte[] data)
+        private string JsonDotNetSerializer(object obj)
         {
-            //TODO:
-            return null;
+            return (string) SerializerMethod.Invoke(null, new [] { obj });
+        }
+
+        private object JsonDotNetDeserialize(string json, Type type)
+        {
+            var method = DeserializeMethod.MakeGenericMethod(type);
+            return method.Invoke(null, new [] { json });
+        }
+
+        private string JsonSerializer(object obj)
+        {
+            var ms = new MemoryStream();
+
+            var serializer = new DataContractJsonSerializer(obj.GetType());
+
+            serializer.WriteObject(ms, obj);
+
+            var reader = new StreamReader(ms);
+
+            return reader.ReadToEnd();
+        }
+
+        private object JsonDeserialize(string json, Type type)
+        {
+            var jsonBytes = Encoding.UTF8.GetBytes(json);
+
+            var ms = new MemoryStream(jsonBytes);
+
+            var serializer = new DataContractJsonSerializer(type);
+
+            return serializer.ReadObject(ms);
+        }
+
+        public JsonFormatter()
+        {
+            UseJsonDotNet = JsonDotNetInit();
+        }
+
+        public bool DataCheck(object obj)
+        {
+            return obj != null;
+        }
+
+        public object Deserialize(byte[] data, Type type)
+        {
+            var json = System.Text.Encoding.UTF8.GetString(data);
+
+            return UseJsonDotNet ? JsonDotNetDeserialize(json, type) : JsonDeserialize(json, type);
+        }
+
+        public byte[] Serialize(object data)
+        {
+            var json = UseJsonDotNet ? JsonDotNetSerializer(data) : JsonSerializer(data);
+
+            return Encoding.UTF8.GetBytes(json);
         }
     }
 
     public class CwRedisCacheAttribute : CwAopAttribute
     {
         protected int WaitTime { get; set; } = 20;
-        public static ISerializer Serializer { get; set; } = new Serializer();
+        public static ISerializer Serializer { get; set; } = new JsonFormatter();
         protected static int redisDb = -1;
         public static int CacheRedisDb { get; set; } = -1;
         public static int LockWaitTime { get; set; } = 20;
@@ -43,7 +121,13 @@ namespace CwLib.AOP.Cache.Redis
         protected string CreateKey()
         {
             //TODO:
-            return $"{CreateNamespaceKey()}{AopAction.TargetMethod.Name}_{1234567890}";
+            var source = Encoding.Default.GetBytes("1234567"); //將字串轉為Byte[]
+
+            var provider = new MD5CryptoServiceProvider();
+            var crypto = provider.ComputeHash(source);
+            var result = BitConverter.ToString(crypto);
+
+            return $"{CreateNamespaceKey()}{AopAction.TargetMethod.Name}_{result}";
         }
 
         protected string CreateNamespaceKey()
@@ -69,7 +153,7 @@ namespace CwLib.AOP.Cache.Redis
 
             db = CwLib.Redis.Redis.GetDatabase(RedisDb == -1 ? redisDb : RedisDb);
 
-            _result = Serializer.Deserialize(db.GetFormSlaveAsync(key).Result);
+            _result = Serializer.Deserialize(db.GetFormSlaveAsync(key).Result, AopAction.TargetMethod.ReturnType);
 
             if (_result != null)
             {
