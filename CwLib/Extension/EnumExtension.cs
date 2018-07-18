@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 
 namespace CwLib.Extension
 {
@@ -9,7 +10,7 @@ namespace CwLib.Extension
         {
             var fieldInfo = value.GetType().GetField(value.ToString());
             var attributes = (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-            if ((attributes != null) && (attributes.Length > 0))
+            if (attributes.Any())
             {
                 return attributes[0].Description;
             }
