@@ -3,7 +3,7 @@ using System;
 namespace CwLib
 {
     /// <summary>
-    /// Load or set Environment Variable
+    /// Environment Variable
     /// </summary>
     public class EnvVar
     {
