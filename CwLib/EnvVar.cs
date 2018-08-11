@@ -9,6 +9,8 @@ namespace CwLib
     {
         EnvironmentVariableTarget _target;
 
+        public EnvVar() : this(EnvironmentVariableTarget.Process) { }
+
         public EnvVar(EnvironmentVariableTarget target)
         {
             _target = target;
