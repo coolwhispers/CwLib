@@ -3,13 +3,13 @@ using System;
 namespace CwLib
 {
     /// <summary>
-    /// 
+    /// Load or set Environment Var
     /// </summary>
-    public class EnvVal
+    public class EnvVar
     {
         EnvironmentVariableTarget _target;
 
-        public EnvVal(EnvironmentVariableTarget target)
+        public EnvVar(EnvironmentVariableTarget target)
         {
             _target = target;
         }
