@@ -3,7 +3,7 @@ using System;
 namespace CwLib
 {
     /// <summary>
-    /// Load or set Environment Var
+    /// Load or set Environment Variable
     /// </summary>
     public class EnvVar
     {
@@ -14,6 +14,10 @@ namespace CwLib
             _target = target;
         }
 
+        /// <summary>
+        /// Get or set environment variable
+        /// </summary>
+        /// <value></value>
         public string this [string key]
         {
             get
